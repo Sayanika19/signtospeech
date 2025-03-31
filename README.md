@@ -3,7 +3,7 @@
 📌 Project Overview  
 GestureTalk is an innovative Human-Computer Interface (HCI) that bridges the communication gap between the deaf/hard-of-hearing community and non-signers. Developed by Team SilentSync( @surajkumarbiswas and @sayanikaraha , this project leverages computer vision and machine learning to translate sign language gestures into real-time text and speech, fostering inclusivity and independence.  
 
-Key Features  
+#Key Features  
 
 1. Real-Time Translation:
       Accurately converts ASL (American Sign Language) gestures into text and spoken language with minimal latency.
