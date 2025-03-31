@@ -1,0 +1,5 @@
+Flask
+opencv-python
+pyttsx3
+googletrans==4.0.0-rc1
+gunicorn

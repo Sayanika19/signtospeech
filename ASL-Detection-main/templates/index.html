@@ -1,0 +1,774 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Translator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #93c5fd;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --rounded-sm: 0.25rem;
+            --rounded-md: 0.5rem;
+            --rounded-lg: 0.75rem;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .video-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .video-container {
+            position: relative;
+            border-radius: var(--rounded-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            background-color: #000;
+        }
+
+        .video-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .prediction-panel {
+            background-color: var(--surface);
+            border-radius: var(--rounded-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .prediction-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .prediction-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 300px;
+        }
+
+        .prediction-text {
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            background-color: var(--background);
+            padding: 2rem;
+            border-radius: var(--rounded-md);
+            width: 100%;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+        }
+
+        .sentence-formation {
+            margin-top: 1rem;
+            background-color: var(--surface);
+            padding: 1rem;
+            border-radius: var(--rounded-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sentence-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .sentence-text {
+            font-size: 1.25rem;
+            line-height: 1.5;
+            min-height: 60px;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--rounded-sm);
+            background-color: var(--background);
+        }
+
+        .sentence-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .sentence-button {
+            padding: 0.5rem 1rem;
+            border-radius: var(--rounded-sm);
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .add-space {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .add-space:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .clear-sentence {
+            background-color: #f1f5f9;
+            color: var(--text-secondary);
+        }
+
+        .clear-sentence:hover {
+            background-color: #e2e8f0;
+        }
+
+        .speak-sentence {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .speak-sentence:hover {
+            background-color: #0d9f6e;
+        }
+
+        .backspace-sentence {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .backspace-sentence:hover {
+            background-color: #d97706;
+        }
+
+        .suggestions-container {
+            margin-top: 1rem;
+        }
+
+        .suggestions-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .suggestions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .suggestion-chip {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .suggestion-chip:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .select-container {
+            position: relative;
+            min-width: 200px;
+        }
+
+        .select-container label {
+            position: absolute;
+            top: -0.75rem;
+            left: 0.75rem;
+            background-color: var(--surface);
+            padding: 0 0.25rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            z-index: 1;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--rounded-md);
+            background-color: var(--surface);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-button {
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--rounded-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .space-button {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .space-button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .clear-button {
+            background-color: #f1f5f9;
+            color: var(--text-secondary);
+        }
+
+        .clear-button:hover {
+            background-color: #e2e8f0;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .indicator-dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .transcript-container {
+            margin-top: 1rem;
+            background-color: var(--surface);
+            padding: 1rem;
+            border-radius: var(--rounded-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .transcript-title {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .transcript-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            min-height: 60px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--rounded-sm);
+        }
+
+        .sentence-instruction {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-container {
+                padding: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Sign Language Translator</h1>
+            <p class="subtitle">Real-time sign language to text conversion</p>
+        </header>
+
+        <div class="main-content">
+            <div class="video-panel">
+                <div class="video-container">
+                    <img src="{{ url_for('video_feed') }}" alt="Sign Language Camera Feed">
+                </div>
+                <div class="controls">
+                    <div class="select-container">
+                        <label for="language-select">Language</label>
+                        <select id="language-select" onchange="changeLanguage()">
+                            <option value="en">English</option>
+                            <option value="hi">Hindi</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </select>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-button clear-button" onclick="clearAll()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Clear All
+                        </button>
+                        <button class="action-button space-button" onclick="addSpaceToSentence()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M13 3H5a2 2 0 0 0-2 2v6h4v4h12v-6h4V5a2 2 0 0 0-2-2z"></path>
+                                <path d="M3 15h18"></path>
+                            </svg>
+                            Space
+                        </button>
+                    </div>
+                </div>
+                <div class="suggestions-container">
+                    <div class="suggestions-title">Suggested Completions</div>
+                    <div class="suggestions-list" id="suggestions-list">
+                       
+                    </div>
+                </div>
+            </div>
+
+            <div class="prediction-panel">
+                <div class="prediction-header">
+                    <span class="prediction-title">Current Prediction</span>
+                    <div class="status-indicator">
+                        <span class="indicator-dot"></span>
+                        <span>Active</span>
+                    </div>
+                </div>
+                <div class="prediction-content">
+                    <div class="prediction-text" id="predicted-text"></div>
+                    
+                    <div class="sentence-formation">
+                        <div class="sentence-title">Forming Sentence</div>
+                        <div class="sentence-text" id="sentence-text"></div>
+                        <div class="sentence-actions">
+                            <button class="sentence-button add-space" onclick="addSpaceToSentence()">Add Space</button>
+                            <button class="sentence-button backspace-sentence" 
+                                    onclick="handleBackspace()" 
+                                    onmousedown="startBackspaceHold()" 
+                                    onmouseup="clearBackspaceInterval()"
+                                    onmouseleave="clearBackspaceInterval()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+                                    <line x1="18" y1="9" x2="12" y2="15"></line>
+                                    <line x1="12" y1="9" x2="18" y2="15"></line>
+                                </svg>
+                                Backspace
+                            </button>
+                            <button class="sentence-button clear-sentence" onclick="clearSentence()">Clear Sentence</button>
+                            <button class="sentence-button speak-sentence" onclick="speakSentence()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                                Speak
+                            </button>
+                            <button class="sentence-button commit-sentence" onclick="commitSentence()" style="background-color: #10b981; color: white;">Add to Transcript</button>
+                        </div>
+                        <div class="sentence-instruction">
+                            Press 'n' key to end current word, 'Backspace' to delete
+                        </div>
+                    </div>
+                    
+                    <div class="transcript-container">
+                        <div class="transcript-title">Final Transcript</div>
+                        <div class="transcript-text" id="transcript-text"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WORD_LIST = [
+    "hello", "help", "please", "thank", "you", "water", "food", "yes", "no", 
+    "good", "bad", "more", "less", "stop", "go", "come", "here", "there", "are", "is",
+    "my", "name", "is", "what", "where", "when", "why", "how", "who", "can",
+    "happy", "sad", "angry", "tired", "hungry", "thirsty", "pain", "hurt",
+    "doctor", "hospital", "medicine", "home", "work", "school", "friend",
+    "family", "mother", "father", "brother", "sister", "child", "baby",
+    "man", "woman", "boy", "girl", "time", "day", "night", "morning",
+    "afternoon", "evening", "today", "tomorrow", "yesterday", "now", "later",
+    "apple", "always", "amazing", "after", "answer", "afternoon", "angry", "around", "arrange", "advice",
+    "book", "better", "beautiful", "bring", "bottle", "breakfast", "brother", "believe", "begin", "busy",
+    "come", "care", "call", "clean", "create", "choose", "chance", "carry", "close", "clever",
+    "day", "door", "drive", "doctor", "deep", "dream", "dance", "depend", "delicious", "different",
+    "eat", "early", "easy", "energy", "exciting", "example", "enough", "every", "enjoy", "explain",
+    "friend", "family", "feel", "fast", "forget", "finish", "find", "future", "follow", "freedom",
+    "good", "great", "give", "goal", "glass", "garden", "grow", "ground", "guess", "gentle",
+    "happy", "house", "help", "hello", "hope", "history", "hundred", "hard", "health", "happen",
+    "important", "idea", "inside", "interest", "improve", "issue", "imagine", "increase", "invite", "include",
+    "jump", "joke", "joy", "join", "journey", "just", "judge", "juice", "jeans", "january",
+    "kind", "keep", "key", "kick", "kitchen", "know", "knowledge", "knock", "kid", "kite",
+    "love", "learn", "laugh", "listen", "lucky", "light", "little", "leave", "letter", "large",
+    "make", "money", "morning", "mother", "match", "month", "market", "move", "modern", "music",
+    "name", "number", "need", "notice", "near", "nature", "normal", "night", "narrow", "nothing",
+    "open", "orange", "office", "offer", "often", "order", "outside", "over", "opposite", "opinion",
+    "people", "place", "play", "plan", "problem", "picture", "possible", "phone", "present", "price",
+    "question", "quick", "quiet", "quarter", "queen", "quality", "quote", "queue", "quit", "quiz",
+    "read", "run", "right", "reason", "really", "reach", "rain", "respect", "rest", "road",
+    "school", "smile", "start", "strong", "simple", "speak", "story", "stop", "sweet", "small",
+    "time", "talk", "today", "thank", "travel", "teach", "try", "touch", "think", "team",
+    "under", "use", "understand", "usually", "until", "unique", "useful", "universe", "update", "upset",
+    "very", "visit", "voice", "view", "value", "victory", "village", "vehicle", "vote", "vacation",
+    "water", "work", "write", "walk", "wish", "welcome", "window", "wonderful", "weather", "warm",
+    "x-ray", "xenon", "xerox", "xylophone", "x-axis", "xenophobia", "x-ray machine", "x-factor", "xylitol", "xbox",
+    "yes", "you", "young", "yellow", "year", "yesterday", "yourself", "youth", "yet", "yawn",
+    "zoo", "zero", "zebra", "zoom", "zigzag", "zone", "zeal", "zinc", "zenith", "zipper"
+
+        ];
+
+        let transcript = "";
+        let currentLetter = "";
+        let lastPrediction = "";
+        let formingWord = "";
+        let sentence = "";
+        let speechSynthesis = window.speechSynthesis;
+        let backspaceInterval;
+        let isBackspaceHeld = false;
+        const BACKSPACE_HOLD_DELAY = 300; // milliseconds before continuous backspace starts
+        const BACKSPACE_REPEAT_RATE = 100; // milliseconds between backspaces when held
+
+        function updatePrediction() {
+            fetch('/predict')
+                .then(response => response.json())
+                .then(data => {
+                    const predictionText = document.getElementById('predicted-text');
+                    if (data.prediction && data.prediction.trim() !== '' && data.prediction !== "  ") {
+                        currentLetter = data.prediction.toLowerCase();
+                        predictionText.innerText = currentLetter;
+                        predictionText.style.color = 'var(--text-primary)';
+                        
+                        if (currentLetter !== lastPrediction) {
+                            formingWord += currentLetter;
+                            document.getElementById('sentence-text').innerText = sentence + formingWord;
+                            lastPrediction = currentLetter;
+                            updateSuggestions(formingWord);
+                        }
+                    } else {
+                        predictionText.innerText = '';
+                        if (lastPrediction !== "") {
+                            lastPrediction = "";
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching prediction:', error);
+                });
+        }
+
+        function speakSentence() {
+            if (sentence.trim() === '' && formingWord.trim() === '') return;
+            
+            const fullSentence = (sentence + formingWord).trim();
+            if (fullSentence === '') return;
+            
+            const utterance = new SpeechSynthesisUtterance(fullSentence);
+            
+            // Set language based on selected option
+            const langSelect = document.getElementById('language-select');
+            utterance.lang = langSelect.value;
+            
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+            
+            // Speak the sentence
+            speechSynthesis.speak(utterance);
+        }
+
+        function endCurrentWord() {
+            if (formingWord) {
+                sentence += formingWord + ' ';
+                formingWord = "";
+                document.getElementById('sentence-text').innerText = sentence;
+                updateSuggestions("");
+            }
+        }
+
+        function addSpaceToSentence() {
+            endCurrentWord();
+            sentence += ' ';
+            document.getElementById('sentence-text').innerText = sentence;
+        }
+
+        function clearSentence() {
+            sentence = '';
+            formingWord = '';
+            document.getElementById('sentence-text').innerText = '';
+            updateSuggestions("");
+        }
+
+        function commitSentence() {
+            endCurrentWord();
+            if (sentence.trim() !== '') {
+                transcript += sentence + '\n';
+                document.getElementById('transcript-text').innerText = transcript;
+                clearSentence();
+            }
+        }
+
+        function clearAll() {
+            transcript = '';
+            currentLetter = '';
+            formingWord = '';
+            sentence = '';
+            document.getElementById('transcript-text').innerText = '';
+            document.getElementById('predicted-text').innerText = '';
+            document.getElementById('sentence-text').innerText = '';
+            updateSuggestions("");
+        }
+
+        function changeLanguage() {
+            const selectedLang = document.getElementById('language-select').value;
+            const predictionText = document.getElementById('predicted-text');
+            predictionText.innerText = '';
+            
+            fetch('/change_language', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ language: selectedLang })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.message);
+                updatePrediction();
+            })
+            .catch(error => {
+                console.error('Error changing language:', error);
+                predictionText.innerText = 'Error changing language';
+                predictionText.style.color = '#ef4444';
+            });
+        }
+
+        function updateSuggestions(partialWord) {
+            const suggestionsList = document.getElementById('suggestions-list');
+            suggestionsList.innerHTML = '';
+            
+            if (!partialWord || partialWord.trim() === '') {
+                const defaults = ["hello", "help", "thank you", "yes", "no"];
+                defaults.forEach(word => {
+                    const chip = document.createElement('button');
+                    chip.className = 'suggestion-chip';
+                    chip.textContent = word;
+                    chip.onclick = () => {
+                        sentence += word + ' ';
+                        document.getElementById('sentence-text').innerText = sentence;
+                    };
+                    suggestionsList.appendChild(chip);
+                });
+                return;
+            }
+
+            const matchingWords = WORD_LIST.filter(word => 
+                word.startsWith(partialWord.toLowerCase())
+            ).slice(0, 8);
+
+            if (matchingWords.length > 0) {
+                matchingWords.forEach(word => {
+                    const chip = document.createElement('button');
+                    chip.className = 'suggestion-chip';
+                    
+                    const matchingPart = word.substring(0, partialWord.length);
+                    const remainingPart = word.substring(partialWord.length);
+                    
+                    chip.innerHTML = `<span style="font-weight:600">${matchingPart}</span>${remainingPart}`;
+                    chip.onclick = () => {
+                        sentence += word + ' ';
+                        document.getElementById('sentence-text').innerText = sentence;
+                    };
+                    suggestionsList.appendChild(chip);
+                });
+            } else {
+                const noSuggestion = document.createElement('div');
+                noSuggestion.className = 'suggestion-chip';
+                noSuggestion.textContent = 'No suggestions';
+                noSuggestion.style.opacity = '0.7';
+                noSuggestion.style.cursor = 'default';
+                suggestionsList.appendChild(noSuggestion);
+            }
+        }
+
+        function handleBackspace() {
+            if (formingWord.length > 0) {
+                // Remove last character from forming word
+                formingWord = formingWord.slice(0, -1);
+            } else if (sentence.length > 0) {
+                // Remove last character from sentence
+                sentence = sentence.trimEnd();
+                const lastSpaceIndex = sentence.lastIndexOf(' ');
+                if (lastSpaceIndex === -1) {
+                    sentence = '';
+                } else {
+                    sentence = sentence.substring(0, lastSpaceIndex + 1);
+                }
+            }
+            updateSentenceDisplay();
+        }
+        
+        function deleteLastWord() {
+            if (formingWord.length > 0) {
+                formingWord = '';
+            } else if (sentence.length > 0) {
+                sentence = sentence.trimEnd();
+                const lastSpaceIndex = sentence.lastIndexOf(' ');
+                if (lastSpaceIndex === -1) {
+                    sentence = '';
+                } else {
+                    sentence = sentence.substring(0, lastSpaceIndex + 1);
+                }
+            }
+            updateSentenceDisplay();
+        }
+        
+        function startBackspaceHold() {
+            isBackspaceHeld = true;
+            backspaceInterval = setTimeout(() => {
+                if (isBackspaceHeld) {
+                    backspaceInterval = setInterval(deleteLastWord, BACKSPACE_REPEAT_RATE);
+                }
+            }, BACKSPACE_HOLD_DELAY);
+        }
+        
+        function clearBackspaceInterval() {
+            isBackspaceHeld = false;
+            clearTimeout(backspaceInterval);
+            clearInterval(backspaceInterval);
+        }
+        
+        function updateSentenceDisplay() {
+            document.getElementById('sentence-text').innerText = sentence + formingWord;
+            updateSuggestions(formingWord);
+        }
+
+        // Add event listener for 'n' key to end current word
+        document.addEventListener('keydown', function(event) {
+            if (event.key.toLowerCase() === 'n') {
+                endCurrentWord();
+            } else if (event.key === 'Backspace') {
+                event.preventDefault(); // Prevent browser back navigation
+                handleBackspace();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePrediction();
+            updateSuggestions("");
+            setInterval(updatePrediction, 500);
+        });
+    </script>
+</body>
+</html>
